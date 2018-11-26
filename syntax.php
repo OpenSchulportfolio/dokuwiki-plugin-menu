@@ -63,7 +63,7 @@ class syntax_plugin_menu extends DokuWiki_Syntax_Plugin {
             'url'    => 'http://www.dokuwiki.org/wiki:plugins',
         );
     }
- 
+
    /**
     * Get the type of syntax this plugin defines.
     *
@@ -78,7 +78,7 @@ class syntax_plugin_menu extends DokuWiki_Syntax_Plugin {
     function getType(){
         return 'protected';
     }
- 
+
    /**
     * Define how this plugin is handled regarding paragraphs.
     *
@@ -100,7 +100,7 @@ class syntax_plugin_menu extends DokuWiki_Syntax_Plugin {
     function getPType(){
         return 'block';
     }
- 
+
    /**
     * Where to sort in?
     *
@@ -114,7 +114,7 @@ class syntax_plugin_menu extends DokuWiki_Syntax_Plugin {
     function getSort(){
         return 135;
     }
- 
+
    /**
     * Connect lookup pattern to lexer.
     *
@@ -127,12 +127,12 @@ class syntax_plugin_menu extends DokuWiki_Syntax_Plugin {
        $this->Lexer->addEntryPattern('<menu>(?=.*?</menu.*?>)',$mode,'plugin_menu');
        $this->Lexer->addEntryPattern('<menu\s[^\r\n\|]*?>(?=.*?</menu.*?>)',$mode,'plugin_menu');
     }
- 
+
     function postConnect() {
       $this->Lexer->addPattern('<item>.+?</item>','plugin_menu');
       $this->Lexer->addExitPattern('</menu>','plugin_menu');
     }
- 
+
    /**
     * Handler to prepare matched data for the rendering process.
     *
@@ -165,7 +165,7 @@ class syntax_plugin_menu extends DokuWiki_Syntax_Plugin {
     function handle($match, $state, $pos, Doku_Handler $handler)
     {
         switch ($state) {
-            case DOKU_LEXER_ENTER: 
+            case DOKU_LEXER_ENTER:
                 $this->_reset();        // reset object;
 
                 $opts = $this->_parseOptions(trim(substr($match,5,-1)));
@@ -216,7 +216,7 @@ class syntax_plugin_menu extends DokuWiki_Syntax_Plugin {
         }
         return array();
     }
- 
+
     function _reset()
     {
         $this->rcmd = array();
@@ -231,7 +231,7 @@ class syntax_plugin_menu extends DokuWiki_Syntax_Plugin {
         // Split title from URL
         $link = explode('|',$link,2);
         $ref  = trim($link[0]);
-        
+
         //decide which kind of link it is
         if ( preg_match('/^[a-zA-Z0-9\.]+>{1}.*$/u',$ref) ) {
             // Interwiki
@@ -288,7 +288,7 @@ class syntax_plugin_menu extends DokuWiki_Syntax_Plugin {
         if (empty($data)) return false;
 
         if($mode == 'xhtml'){
-            if ($data['type'] != "menubar"){  
+            if ($data['type'] != "menubar"){
                     $renderer->doc .= '<div class="menu menu'.$data['float'].'"';
                     $renderer->doc .= ' style="width:' . $data['width'] . '">'."\n";
                     if (isset($data['caption']))
@@ -331,7 +331,7 @@ class syntax_plugin_menu extends DokuWiki_Syntax_Plugin {
                     return true;
             }
             // menubar mode: 1 row with small captions
-            if ($data['type'] == "menubar"){  
+            if ($data['type'] == "menubar"){
                     $renderer->doc .= '<div id="menu"><ul class="menubar">'."\n";
                   //  if (isset($data['caption']))
                   //      $renderer->doc .= '<p class="caption">'.$data['caption'].'</p>'."\n";

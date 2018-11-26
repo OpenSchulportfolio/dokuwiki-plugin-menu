@@ -17,8 +17,8 @@ div.menuright {
 }
 
 div.menuitem {
-    display:inline-block;
-    vertical-align:top;
+    display:flex;
+    align-items:flex-start;
     text-align:left;
 }
 
