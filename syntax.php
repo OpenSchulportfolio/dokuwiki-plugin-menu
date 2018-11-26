@@ -30,8 +30,6 @@ class syntax_plugin_menu extends DokuWiki_Syntax_Plugin {
     var $rcmd = array();  /**< Command array for the renderer */
 
     function __construct() {
-        global $ID;
-        global $conf;
     }
 
 
@@ -65,7 +63,7 @@ class syntax_plugin_menu extends DokuWiki_Syntax_Plugin {
             'url'    => 'http://www.dokuwiki.org/wiki:plugins',
         );
     }
- 
+
    /**
     * Get the type of syntax this plugin defines.
     *
@@ -80,7 +78,7 @@ class syntax_plugin_menu extends DokuWiki_Syntax_Plugin {
     function getType(){
         return 'protected';
     }
- 
+
    /**
     * Define how this plugin is handled regarding paragraphs.
     *
@@ -102,7 +100,7 @@ class syntax_plugin_menu extends DokuWiki_Syntax_Plugin {
     function getPType(){
         return 'block';
     }
- 
+
    /**
     * Where to sort in?
     *
@@ -116,7 +114,7 @@ class syntax_plugin_menu extends DokuWiki_Syntax_Plugin {
     function getSort(){
         return 135;
     }
- 
+
    /**
     * Connect lookup pattern to lexer.
     *
@@ -129,12 +127,12 @@ class syntax_plugin_menu extends DokuWiki_Syntax_Plugin {
        $this->Lexer->addEntryPattern('<menu>(?=.*?</menu.*?>)',$mode,'plugin_menu');
        $this->Lexer->addEntryPattern('<menu\s[^\r\n\|]*?>(?=.*?</menu.*?>)',$mode,'plugin_menu');
     }
- 
+
     function postConnect() {
       $this->Lexer->addPattern('<item>.+?</item>','plugin_menu');
       $this->Lexer->addExitPattern('</menu>','plugin_menu');
     }
- 
+
    /**
     * Handler to prepare matched data for the rendering process.
     *
@@ -167,7 +165,7 @@ class syntax_plugin_menu extends DokuWiki_Syntax_Plugin {
     function handle($match, $state, $pos, Doku_Handler $handler)
     {
         switch ($state) {
-            case DOKU_LEXER_ENTER: 
+            case DOKU_LEXER_ENTER:
                 $this->_reset();        // reset object;
 
                 $opts = $this->_parseOptions(trim(substr($match,5,-1)));
@@ -177,10 +175,16 @@ class syntax_plugin_menu extends DokuWiki_Syntax_Plugin {
                 if ($opts['align'] == "left")   $this->rcmd['float'] = "left";
                 if ($opts['align'] == "center") $this->rcmd['float'] = "center";
                 if ($opts['align'] == "right")  $this->rcmd['float'] = "right";
+                if ($opts['valign'] == "top")   $this->rcmd['valign'] = "vtop";
+                if ($opts['valign'] == "center") $this->rcmd['valign'] = "vcenter";
+                if ($opts['valign'] == "bottom")  $this->rcmd['valign'] = "vbottom";
                 if (!empty($opts['caption']))
                     $this->rcmd['caption'] = hsc($opts['caption']);
                 if (!empty($opts['type']))
                     $this->rcmd['type'] = hsc($opts['type']);
+                if (!empty($opts['width']))
+                    $this->rcmd['width'] = hsc($opts['width']);
+                $this->rcmd['wrap'] = !empty($opts['wrap']);
             break;
           case DOKU_LEXER_MATCHED:
 
@@ -197,26 +201,31 @@ class syntax_plugin_menu extends DokuWiki_Syntax_Plugin {
                                                "link"  => $link,
                                                "descr" => hsc($menuitem[1]));
 
-                // find out how much space the biggest menu item needs
-                $titlelen = mb_strlen($menuitem[0], "UTF-8");
-                if ($titlelen > $this->rcmd['width'])
-                    $this->rcmd['width'] = $titlelen;
+                if (!empty($opts['width'])) {
+                    // find out how much space the biggest menu item needs
+                    $titlelen = mb_strlen($menuitem[0], "UTF-8");
+                    if ($titlelen > $this->rcmd['width'])
+                        $this->rcmd['width'] = $titlelen;
+                }
             break;
           case DOKU_LEXER_EXIT:
               // give the menu a convinient width. IE6 needs more space here than Firefox
-              $this->rcmd['width'] += 5;
+              if (!empty($opts['width'])) {
+                  $this->rcmd['width'] += 5;
+              }
               return $this->rcmd;
           default:
             break;
         }
         return array();
     }
- 
+
     function _reset()
     {
         $this->rcmd = array();
         $this->rcmd['columns'] = 1;
         $this->rcmd['float']   = "left";
+        $this->rcmd['valign']  = "vtop";
     }
 
     function _itemlink($match, $title) {
@@ -226,7 +235,7 @@ class syntax_plugin_menu extends DokuWiki_Syntax_Plugin {
         // Split title from URL
         $link = explode('|',$link,2);
         $ref  = trim($link[0]);
-        
+
         //decide which kind of link it is
         if ( preg_match('/^[a-zA-Z0-9\.]+>{1}.*$/u',$ref) ) {
             // Interwiki
@@ -283,15 +292,16 @@ class syntax_plugin_menu extends DokuWiki_Syntax_Plugin {
         if (empty($data)) return false;
 
         if($mode == 'xhtml'){
-            if ($data['type'] != "menubar"){  
-                    // for IE6 2x10em does not fit into 20em, it needs 21em
-                    $renderer->doc .= '<div class="menu menu'.$data['float'].'"';
-                    $renderer->doc .= ' style="width:'.($data['columns'] * $data['width'] + 2).'em;">'."\n";
+            if ($data['type'] != "menubar"){
+                    $renderer->doc .= '<div class="menu menu'.$data['float'].' menu'.$data['valign'].'"';
+                    $renderer->doc .= ' style="width:' . $data['width'] . '">'."\n";
                     if (isset($data['caption']))
                         $renderer->doc .= '<p class="caption">'.$data['caption'].'</p>'."\n";
 
+                    $width = floor(100 / $data['columns']) . '%';
+
                     foreach($data['items'] as $item) {
-                        $renderer->doc .= '<div class="menuitem" style="width:'.$data['width'].'em;">'."\n";
+                        $renderer->doc .= '<div class="menuitem" style="width:' . $width . '">'."\n";
 
                         // create <img .. /> tag
                         list($type, $args) = $item['image'];
@@ -308,25 +318,24 @@ class syntax_plugin_menu extends DokuWiki_Syntax_Plugin {
                         $renderer->doc .= $renderer->_formatLink($link);
 
                         $link['name']  = '<span class="menutext">'.$args[1].'</span>';
+                        $renderer->doc .= '<div class="menutextcontainer">'."\n";
                         $renderer->doc .= $renderer->_formatLink($link);
                         $renderer->doc .= '<p class="menudesc">'.$item['descr'].'</p>';
+                        $renderer->doc .= '</div>'."\n";
+
                         $renderer->doc .= '</div>'."\n";
                     }
 
                     $renderer->doc .= '</div>'."\n";
 
-                    if ($data['float'] == "right") /* center: clear text floating */
-                        $renderer->doc .= '<p style="clear:both;" />';
-                    if ($data['float'] == "left") /* center: clear text floating */
-                        $renderer->doc .= '<p style="clear:both;" />';
-                    if ($data['float'] == "center") /* center: clear text floating */
+                    // Clear left/right floats, unless the 'wrap' setting is enabled.
+                    if (!$data['wrap'] && ($data['float'] == "right" || $data['float'] == "left"))
                         $renderer->doc .= '<p style="clear:both;" />';
 
                     return true;
             }
             // menubar mode: 1 row with small captions
-            if ($data['type'] == "menubar"){  
-                    // for IE6 2x10em does not fit into 20em, it needs 21em
+            if ($data['type'] == "menubar"){
                     $renderer->doc .= '<div id="menu"><ul class="menubar">'."\n";
                   //  if (isset($data['caption']))
                   //      $renderer->doc .= '<p class="caption">'.$data['caption'].'</p>'."\n";
@@ -355,8 +364,6 @@ class syntax_plugin_menu extends DokuWiki_Syntax_Plugin {
                     }
 
                     $renderer->doc .= '</ul></div>'."\n";
-                    if ($data['float'] == "center") /* center: clear text floating */
-                        $renderer->doc .= '<p style="clear:both;" />';
 
                     return true;
             }
@@ -391,6 +398,7 @@ class syntax_plugin_menu extends DokuWiki_Syntax_Plugin {
     function _getLink($type, $args, &$renderer)
     {
         global $ID;
+        global $conf;
 
         $check = false;
         $exists = false;
