@@ -16,6 +16,18 @@ div.menuright {
     float:right
 }
 
+div.menuvtop .menuitem {
+    align-items:flex-start;
+}
+
+div.menuvcenter .menuitem {
+    align-items:center;
+}
+
+div.menuvbottom .menuitem {
+    align-items:flex-end;
+}
+
 div.menuitem {
     display:flex;
     align-items:flex-start;

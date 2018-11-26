@@ -175,6 +175,9 @@ class syntax_plugin_menu extends DokuWiki_Syntax_Plugin {
                 if ($opts['align'] == "left")   $this->rcmd['float'] = "left";
                 if ($opts['align'] == "center") $this->rcmd['float'] = "center";
                 if ($opts['align'] == "right")  $this->rcmd['float'] = "right";
+                if ($opts['valign'] == "top")   $this->rcmd['valign'] = "vtop";
+                if ($opts['valign'] == "center") $this->rcmd['valign'] = "vcenter";
+                if ($opts['valign'] == "bottom")  $this->rcmd['valign'] = "vbottom";
                 if (!empty($opts['caption']))
                     $this->rcmd['caption'] = hsc($opts['caption']);
                 if (!empty($opts['type']))
@@ -222,6 +225,7 @@ class syntax_plugin_menu extends DokuWiki_Syntax_Plugin {
         $this->rcmd = array();
         $this->rcmd['columns'] = 1;
         $this->rcmd['float']   = "left";
+        $this->rcmd['valign']  = "vtop";
     }
 
     function _itemlink($match, $title) {
@@ -289,7 +293,7 @@ class syntax_plugin_menu extends DokuWiki_Syntax_Plugin {
 
         if($mode == 'xhtml'){
             if ($data['type'] != "menubar"){
-                    $renderer->doc .= '<div class="menu menu'.$data['float'].'"';
+                    $renderer->doc .= '<div class="menu menu'.$data['float'].' menu'.$data['valign'].'"';
                     $renderer->doc .= ' style="width:' . $data['width'] . '">'."\n";
                     if (isset($data['caption']))
                         $renderer->doc .= '<p class="caption">'.$data['caption'].'</p>'."\n";
