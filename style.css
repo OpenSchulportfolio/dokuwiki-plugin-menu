@@ -1,25 +1,25 @@
 
 div.menu {
-    text-align:left;
+    display:flex;
+    flex-wrap:wrap;
 }
 
 div.menucenter {
-    margin:auto;
+    margin: auto;
 }
 
 div.menuleft {
-    margin:0;
     float:left
 }
 
 div.menuright {
-    margin:0;
     float:right
 }
 
 div.menuitem {
-    float:left;
-    padding:5px 5px 0 0;
+    display:inline-block;
+    vertical-align:top;
+    text-align:left;
 }
 
 div.menu p.caption {
@@ -49,6 +49,7 @@ div.menu p.menudesc {
 }
 
 div#menu ul.menubar {
+    display:flex;
     padding:0;
     margin:0;
     list-style:none !important;
@@ -56,10 +57,16 @@ div#menu ul.menubar {
 
 div#menu ul.menubar li {
     border:none;
-    float:left;
+}
+div#menu ul.menubar li:not(:last-child) {
     margin-right:8px;
 }
 
 div#menu ul.menubar li a {
     text-decoration:none;
+}
+
+div.menutextcontainer {
+    display: flex;
+    flex-flow: column;
 }

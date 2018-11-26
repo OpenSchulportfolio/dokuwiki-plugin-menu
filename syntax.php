@@ -30,8 +30,6 @@ class syntax_plugin_menu extends DokuWiki_Syntax_Plugin {
     var $rcmd = array();  /**< Command array for the renderer */
 
     function __construct() {
-        global $ID;
-        global $conf;
     }
 
 
@@ -181,6 +179,9 @@ class syntax_plugin_menu extends DokuWiki_Syntax_Plugin {
                     $this->rcmd['caption'] = hsc($opts['caption']);
                 if (!empty($opts['type']))
                     $this->rcmd['type'] = hsc($opts['type']);
+                if (!empty($opts['width']))
+                    $this->rcmd['width'] = hsc($opts['width']);
+                $this->rcmd['wrap'] = !empty($opts['wrap']);
             break;
           case DOKU_LEXER_MATCHED:
 
@@ -197,14 +198,18 @@ class syntax_plugin_menu extends DokuWiki_Syntax_Plugin {
                                                "link"  => $link,
                                                "descr" => hsc($menuitem[1]));
 
-                // find out how much space the biggest menu item needs
-                $titlelen = mb_strlen($menuitem[0], "UTF-8");
-                if ($titlelen > $this->rcmd['width'])
-                    $this->rcmd['width'] = $titlelen;
+                if (!empty($opts['width'])) {
+                    // find out how much space the biggest menu item needs
+                    $titlelen = mb_strlen($menuitem[0], "UTF-8");
+                    if ($titlelen > $this->rcmd['width'])
+                        $this->rcmd['width'] = $titlelen;
+                }
             break;
           case DOKU_LEXER_EXIT:
               // give the menu a convinient width. IE6 needs more space here than Firefox
-              $this->rcmd['width'] += 5;
+              if (!empty($opts['width'])) {
+                  $this->rcmd['width'] += 5;
+              }
               return $this->rcmd;
           default:
             break;
@@ -284,14 +289,15 @@ class syntax_plugin_menu extends DokuWiki_Syntax_Plugin {
 
         if($mode == 'xhtml'){
             if ($data['type'] != "menubar"){  
-                    // for IE6 2x10em does not fit into 20em, it needs 21em
                     $renderer->doc .= '<div class="menu menu'.$data['float'].'"';
-                    $renderer->doc .= ' style="width:'.($data['columns'] * $data['width'] + 2).'em;">'."\n";
+                    $renderer->doc .= ' style="width:' . $data['width'] . '">'."\n";
                     if (isset($data['caption']))
                         $renderer->doc .= '<p class="caption">'.$data['caption'].'</p>'."\n";
 
+                    $width = floor(100 / $data['columns']) . '%';
+
                     foreach($data['items'] as $item) {
-                        $renderer->doc .= '<div class="menuitem" style="width:'.$data['width'].'em;">'."\n";
+                        $renderer->doc .= '<div class="menuitem" style="width:' . $width . '">'."\n";
 
                         // create <img .. /> tag
                         list($type, $args) = $item['image'];
@@ -308,25 +314,24 @@ class syntax_plugin_menu extends DokuWiki_Syntax_Plugin {
                         $renderer->doc .= $renderer->_formatLink($link);
 
                         $link['name']  = '<span class="menutext">'.$args[1].'</span>';
+                        $renderer->doc .= '<div class="menutextcontainer">'."\n";
                         $renderer->doc .= $renderer->_formatLink($link);
                         $renderer->doc .= '<p class="menudesc">'.$item['descr'].'</p>';
+                        $renderer->doc .= '</div>'."\n";
+
                         $renderer->doc .= '</div>'."\n";
                     }
 
                     $renderer->doc .= '</div>'."\n";
 
-                    if ($data['float'] == "right") /* center: clear text floating */
-                        $renderer->doc .= '<p style="clear:both;" />';
-                    if ($data['float'] == "left") /* center: clear text floating */
-                        $renderer->doc .= '<p style="clear:both;" />';
-                    if ($data['float'] == "center") /* center: clear text floating */
+                    // Clear left/right floats, unless the 'wrap' setting is enabled.
+                    if (!$data['wrap'] && ($data['float'] == "right" || $data['float'] == "left"))
                         $renderer->doc .= '<p style="clear:both;" />';
 
                     return true;
             }
             // menubar mode: 1 row with small captions
             if ($data['type'] == "menubar"){  
-                    // for IE6 2x10em does not fit into 20em, it needs 21em
                     $renderer->doc .= '<div id="menu"><ul class="menubar">'."\n";
                   //  if (isset($data['caption']))
                   //      $renderer->doc .= '<p class="caption">'.$data['caption'].'</p>'."\n";
@@ -355,8 +360,6 @@ class syntax_plugin_menu extends DokuWiki_Syntax_Plugin {
                     }
 
                     $renderer->doc .= '</ul></div>'."\n";
-                    if ($data['float'] == "center") /* center: clear text floating */
-                        $renderer->doc .= '<p style="clear:both;" />';
 
                     return true;
             }
@@ -391,6 +394,7 @@ class syntax_plugin_menu extends DokuWiki_Syntax_Plugin {
     function _getLink($type, $args, &$renderer)
     {
         global $ID;
+        global $conf;
 
         $check = false;
         $exists = false;
