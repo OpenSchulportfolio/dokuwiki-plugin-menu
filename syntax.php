@@ -57,10 +57,11 @@ class syntax_plugin_menu extends DokuWiki_Syntax_Plugin {
         return array(
             'author' => 'Matthias Grimm',
             'email'  => 'matthiasgrimm@users.sourceforge.net',
-            'date'   => '2009-07-25',
+            //'date'   => '2009-07-25',
+			'date'   => '2018-11-27',
             'name'   => 'Menu Plugin',
             'desc'   => 'Shows a list of links as a nice menu card',
-            'url'    => 'http://www.dokuwiki.org/wiki:plugins',
+            'url'    => 'http://www.dokuwiki.org/plugin:menu',
         );
     }
 
