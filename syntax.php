@@ -380,7 +380,7 @@ class syntax_plugin_menu extends DokuWiki_Syntax_Plugin {
         global $conf;
 
         $link = array();
-        $link['class']  = '';
+        $link['class']  = 'menulink';
         $link['style']  = '';
         $link['pre']    = '';
         $link['suf']    = '';
@@ -426,12 +426,12 @@ class syntax_plugin_menu extends DokuWiki_Syntax_Plugin {
                  $address = rawurlencode($address);
       
             $link = $this->_createLink('mailto:'.$address);
-            $link['class'] = 'JSnocheck';
+            $link['class'] .= ' JSnocheck';
             break;
         case 'locallink':
             $hash = sectionID($args[0], $check);
             $link = $this->_createLink('#'.$hash);
-            $link['class'] = "wikilink1";
+            $link['class'] .= " wikilink1";
             break;
         case 'internallink':
             resolve_pageid(getNS($ID),$args[0],$exists);
@@ -441,13 +441,13 @@ class syntax_plugin_menu extends DokuWiki_Syntax_Plugin {
             if ($hash) $url .= '#'.$hash;    //keep hash anchor
 
             $link = $this->_createLink($url, 'wiki');
-            $link['class'] = $exists ? 'wikilink1' : 'wikilink2';
+            $link['class'] .= $exists ? ' wikilink1' : ' wikilink2';
             break;
         case 'internalmedia':
             resolve_mediaid(getNS($ID),$args[0], $exists);
             $url  = ml($args[0],array('id'=>$ID,'cache'=>$args[5]),true);
             $link = $this->_createLink($url);
-            if (!$exists) $link['class'] = 'wikilink2';
+            if (!$exists) $link['class'] .= ' wikilink2';
             break;
         case 'externalmedia':
             $url  = ml($args[0],array('cache'=>$args[5]));
