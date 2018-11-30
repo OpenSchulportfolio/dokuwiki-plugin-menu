@@ -301,6 +301,7 @@ class syntax_plugin_menu extends DokuWiki_Syntax_Plugin {
 
                     $width = floor(100 / $data['columns']) . '%';
 
+                    $renderer->doc .= '<div class="menuitems">' . "\n";
                     foreach($data['items'] as $item) {
                         $renderer->doc .= '<div class="menuitem" style="width:' . $width . '">'."\n";
 
@@ -327,6 +328,7 @@ class syntax_plugin_menu extends DokuWiki_Syntax_Plugin {
                         $renderer->doc .= '</div>'."\n";
                     }
 
+                    $renderer->doc .= '</div>'."\n";
                     $renderer->doc .= '</div>'."\n";
 
                     // Clear left/right floats, unless the 'wrap' setting is enabled.
