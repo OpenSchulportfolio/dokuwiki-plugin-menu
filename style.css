@@ -1,5 +1,7 @@
-
 div.menu {
+}
+
+div.menuitems {
     display:flex;
     flex-wrap:wrap;
 }
@@ -40,8 +42,11 @@ div.menu p.caption {
     margin:0;
 }
 
+div.menu .menulink {
+    flex-shrink:0;
+}
+
 div.menu img {
-    float:left;
     margin:3px;
     padding-right:3px;
 }
